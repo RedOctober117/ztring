@@ -15,10 +15,6 @@ pub const String = struct {
     string_ptr: []u8,
     length: usize,
 
-    pub fn capacity(self: String) usize {
-        return self.string_ptr.len;
-    }
-
     pub fn init(allocator: Allocator) !String {
         return String{
             .allocator = allocator,
@@ -50,8 +46,26 @@ pub const String = struct {
             _ = &self.resize_with_len(string.len);
         }
 
-        @memcpy(self.string_ptr[0..string.len], string);
+        self.put_at(string, 0, string.len);
         self.length = string.len;
+    }
+
+    fn put_at(self: String, string: []const u8, start_index: usize, end_index: usize) void {
+        @memcpy(self.string_ptr[start_index..end_index], string);
+    }
+
+    pub fn push(self: *String, char: []const u8) void {
+        const new_len = self.length + 1;
+        if (new_len > self.capacity() and char.len > buffer_size) {
+            _ = &self.resize_with_len(new_len + buffer_size);
+        }
+
+        self.put_at(char, self.length, new_len);
+        self.length = new_len;
+    }
+
+    pub fn capacity(self: String) usize {
+        return self.string_ptr.len;
     }
 
     fn resize(self: *String) void {
@@ -65,22 +79,6 @@ pub const String = struct {
     }
 };
 
-// const print = @import("std").debug.print;
-
-// const Duck = struct { Hp: i8, const Self = @This(); fn sleep(self: *Self) void { self.Hp += 1; } };
-
-// const RubberDuck = struct { Hp: i8, const Self = @This(); fn sleep(self: *Self) void { self.Hp -= 1; } };
-
-// fn Rest(t: anytype) void { t.sleep(); }
-
-// pub fn main() void { var d = Duck{ .Hp = 0, };
-
-// var rd = RubberDuck{
-//     .Hp = 0,
-// };
-
-// Rest(&d);
-// Rest(&rd);
-// print("{d},{d}\n", .{ d.Hp, rd.Hp });
-
-// }
+pub const StringError = error{
+    IndexOutOfBound,
+};
