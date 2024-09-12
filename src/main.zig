@@ -32,7 +32,7 @@ test "string put" {
     try std.testing.expect(std.mem.eql(u8, new_str.get(), test_str));
 }
 
-test "string push" {
+test "string push char" {
     const test_char = "t";
 
     var new_str = try String.from(allocator, "tes");
@@ -40,4 +40,14 @@ test "string push" {
     new_str.push(test_char);
 
     try std.testing.expect(std.mem.eql(u8, new_str.get(), "test"));
+}
+
+test "string push word" {
+    const test_char = "world";
+
+    var new_str = try String.from(allocator, "hello ");
+
+    new_str.push(test_char);
+
+    try std.testing.expect(std.mem.eql(u8, new_str.get(), "hello world"));
 }

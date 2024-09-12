@@ -7,7 +7,7 @@ const Allocator = std.mem.Allocator;
 // dereferenced. non-pointer values are not mutable unless the parameter is
 // (self: *Self).
 
-const buffer_size = 10;
+const BUFFER_SIZE = 10;
 
 /// A structure to handle strings in a more robust way.
 pub const String = struct {
@@ -29,7 +29,7 @@ pub const String = struct {
     pub fn init(allocator: Allocator) !String {
         return String{
             .allocator = allocator,
-            .string_ptr = try allocator.alloc(u8, buffer_size),
+            .string_ptr = try allocator.alloc(u8, BUFFER_SIZE),
             .length = 0,
         };
     }
@@ -61,13 +61,14 @@ pub const String = struct {
         self.length = string.len;
     }
 
-    pub fn push(self: *String, char: []const u8) void {
-        const new_len = self.length + 1;
-        if (new_len > self.capacity() and char.len > buffer_size) {
-            _ = &self.resize_with_len(new_len + buffer_size);
+    pub fn push(self: *String, string: []const u8) void {
+        const new_len = self.length + string.len;
+        if (new_len >= self.capacity()) {
+            _ = self.allocator.resize(self.string_ptr, new_len);
+            // self.resize_with_len(new_len + BUFFER_SIZE);
         }
 
-        self.put_at(char, self.length, new_len);
+        self.put_at(string, self.length, new_len);
         self.length = new_len;
     }
 
@@ -76,13 +77,13 @@ pub const String = struct {
     }
 
     fn resize(self: *String) void {
-        const new_len = self.length + buffer_size;
+        const new_len = self.length + BUFFER_SIZE;
         _ = self.allocator.resize(self.string_ptr, new_len);
     }
 
     fn resize_with_len(self: *String, length: usize) void {
         std.debug.print("inc len {d}", .{length});
-        _ = self.allocator.resize(self.string_ptr, length);
+        _ = self.allocator.resize(self.string_ptr.ptr, length);
     }
 };
 
