@@ -9,11 +9,22 @@ const Allocator = std.mem.Allocator;
 
 const buffer_size = 10;
 
+/// A structure to handle strings in a more robust way.
 pub const String = struct {
     //ptr, ptr, value
+    /// The allocator pointer, received from the implementing program.
     allocator: Allocator,
+
+    /// The pointer to the mem location of the string. All operations are
+    /// guaranteed to not change the pointer address.
     string_ptr: []u8,
+
+    /// The length of the text stored. This is different from the capacity of the array itself.
     length: usize,
+
+    fn put_at(self: String, string: []const u8, start_index: usize, end_index: usize) void {
+        @memcpy(self.string_ptr[start_index..end_index], string);
+    }
 
     pub fn init(allocator: Allocator) !String {
         return String{
@@ -48,10 +59,6 @@ pub const String = struct {
 
         self.put_at(string, 0, string.len);
         self.length = string.len;
-    }
-
-    fn put_at(self: String, string: []const u8, start_index: usize, end_index: usize) void {
-        @memcpy(self.string_ptr[start_index..end_index], string);
     }
 
     pub fn push(self: *String, char: []const u8) void {
