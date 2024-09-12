@@ -1,4 +1,5 @@
 const std = @import("std");
+const String = @import("root.zig").String;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -12,4 +13,13 @@ pub fn main() !void {
     @memcpy(string[0..str.len], str);
 
     std.debug.print("{s}\n", .{string});
+
+    const new_string = String.init(allocator);
+    defer new_string.deinit();
+
+    std.debug.print("Empty string: {s}\n", .{new_string.get()});
+
+    new_string.put("test");
+
+    std.debug.print("Full string: {s}\n", .{new_string.get()});
 }
