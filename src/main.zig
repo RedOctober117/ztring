@@ -4,6 +4,23 @@ const String = @import("root.zig").String;
 pub fn main() !void {
     // var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     // const allocator = gpa.allocator();
+
+    // var string = try allocator.alloc(u8, 10);
+    // errdefer allocator.free(string);
+
+    // const str = "hello ";
+
+    // @memcpy(string[0..str.len], str);
+
+    // const append_str = "world";
+
+    // if (str.len + append_str.len > string.len) {
+    //     _ = allocator.resize(string[0..string.len], str.len + append_str.len + 1);
+    // }
+
+    // @memcpy(string[str.len .. str.len + append_str.len], append_str);
+
+    // std.debug.print("{s}\n", .{string});
 }
 
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
