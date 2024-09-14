@@ -27,7 +27,7 @@ var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 
 test "string init" {
-    const new_str = try String.init(allocator);
+    const new_str = String.init(allocator);
 
     try std.testing.expect(std.mem.eql(u8, new_str.get(), ""));
 }
@@ -35,7 +35,7 @@ test "string init" {
 test "string from" {
     const test_str = "test";
 
-    const new_str = try String.from(allocator, test_str);
+    const new_str = String.from(allocator, test_str);
 
     try std.testing.expect(std.mem.eql(u8, new_str.get(), test_str));
 }
@@ -43,7 +43,7 @@ test "string from" {
 test "string put" {
     const test_str = "test";
 
-    var new_str = try String.init(allocator);
+    var new_str = String.init(allocator);
     new_str.put(test_str);
 
     try std.testing.expect(std.mem.eql(u8, new_str.get(), test_str));
@@ -52,7 +52,7 @@ test "string put" {
 test "string push char" {
     const test_char = "t";
 
-    var new_str = try String.from(allocator, "tes");
+    var new_str = String.from(allocator, "tes");
 
     new_str.push(test_char);
 
@@ -62,7 +62,7 @@ test "string push char" {
 test "string push word" {
     const test_char = "world";
 
-    var new_str = try String.from(allocator, "hello ");
+    var new_str = String.from(allocator, "hello ");
 
     new_str.push(test_char);
 

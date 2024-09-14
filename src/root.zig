@@ -22,75 +22,82 @@ pub const String = struct {
     items: []u8,
 
     /// The length of the text stored. This is different from the capacity of the array itself.
-    items_count: usize,
+    item_length: usize,
 
-    total_capacity: usize,
+    /// Total cappacity of the allocation.
+    alloc_capacity: usize,
 
-    fn put_at(self: String, string: []const u8, start_index: usize, end_index: usize) void {
+    fn insert_at(self: Self, string: []const u8, start_index: usize, end_index: usize) void {
         @memcpy(self.items[start_index..end_index], string);
     }
 
-    pub fn init(allocator: Allocator) !String {
-        return String{
+    pub fn init(allocator: Allocator) Self {
+        return Self{
             .allocator = allocator,
-            .items = try allocator.alloc(u8, BUFFER_SIZE),
-            .items_count = 0,
-            .total_capacity = BUFFER_SIZE,
+            .items = undefined,
+            .item_length = 0,
+            .alloc_capacity = 0,
         };
     }
 
-    pub fn deinit(self: String) void {
-        self.allocator.free(self.items);
-    }
-
-    pub fn from(allocator: Allocator, string: []const u8) !String {
-        var new_string = try String.init(allocator);
-        if (new_string.total_capacity < string.len) {
-            _ = &new_string.grow();
-        }
-        new_string.put(string);
+    pub fn from(allocator: Allocator, string: []const u8) Self {
+        var new_string = Self.init(allocator);
+        _ = &new_string.put(string);
 
         return new_string;
     }
 
-    pub fn get(self: String) []u8 {
-        return self.items[0..self.items_count];
+    /// Can panic on mem allocation failure
+    fn guarantee_size(self: *Self, incoming_string_len: usize) void {
+        const required_size = calc_space_to_alloc(self.item_length + incoming_string_len);
+        self.resize(required_size);
     }
 
-    fn allocatedItems(self: String) []u8 {
-        return self.items.ptr[0..self.total_capacity];
-    }
+    fn resize(self: *Self, required_length: usize) void {
+        if (required_length > self.alloc_capacity) {
+            const new_mem = self.allocator.alloc(u8, required_length) catch std.debug.panic("STRING::GUARANTEE_SIZE::MEMORY ALLOCATION FAIL.", .{});
 
-    pub fn put(self: *String, string: []const u8) void {
-        if (string.len > self.total_capacity) {
-            _ = &self.grow();
+            @memcpy(new_mem[0..self.item_length], self.items[0..self.item_length]);
+
+            self.items = new_mem;
+            self.alloc_capacity = required_length;
         }
-
-        self.put_at(string, 0, string.len);
-        self.items_count = string.len;
     }
 
-    pub fn push(self: *String, string: []const u8) void {
-        const new_len = self.items_count + string.len;
-        _ = &self.grow();
-
-        self.put_at(string, self.items_count, new_len);
-        self.items_count = new_len;
+    pub fn deinit(self: Self) void {
+        self.allocator.free(self.items);
     }
 
-    pub fn capacity(self: String) usize {
+    pub fn get(self: Self) []u8 {
+        return self.items[0..self.item_length];
+    }
+
+    pub fn put(self: *Self, string: []const u8) void {
+        self.guarantee_size(string.len);
+
+        self.insert_at(string, 0, string.len);
+        self.item_length = string.len;
+    }
+
+    pub fn push(self: *Self, string: []const u8) void {
+        const new_str_len = self.item_length + string.len;
+        const required_size = calc_space_to_alloc(new_str_len);
+        self.guarantee_size(required_size);
+
+        self.insert_at(string, self.item_length, new_str_len);
+        self.item_length = new_str_len;
+    }
+
+    pub fn capacity(self: Self) usize {
         return self.items.len;
     }
 
-    fn grow(self: *Self) void {
-        const new_mem = self.allocator.alloc(u8, self.total_capacity * 2) catch unreachable;
-
-        @memcpy(new_mem[0..self.items_count], self.items[0..self.items_count]);
-
-        self.items = new_mem;
+    fn calc_space_to_alloc(size: usize) usize {
+        return size + BUFFER_SIZE;
     }
 };
 
 pub const StringError = error{
+    MemoryAllocationError,
     IndexOutOfBound,
 };
