@@ -5,8 +5,6 @@ const print = @import("std").debug.print;
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 
-pub fn main() !void {}
-
 test "string init" {
     const new_str = String.init(allocator);
 

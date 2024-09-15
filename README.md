@@ -1,3 +1,6 @@
+to build: `zig build`
+to test: `zig build test`
+
 # Problem Analysis
 
 ## Goal 
