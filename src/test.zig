@@ -47,3 +47,19 @@ test "string push word" {
 
     try std.testing.expect(std.mem.eql(u8, new_str.get(), "hello world"));
 }
+
+test "string clear" {
+    var new_str = String.from(allocator, "test");
+
+    new_str.clear();
+
+    try std.testing.expect(new_str.items.len == 0);
+}
+
+// test "string pop count" {
+//     var new_str = String.from(allocator, "test string");
+
+//     const popped = new_str.pop_count(6, allocator);
+
+//     try std.testing.expect(std.mem.eql(u8, popped.get(), "string"));
+// }
